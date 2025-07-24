@@ -5,25 +5,29 @@ import { useState, type ChangeEvent, type MouseEvent } from "react";
 import Model from "./Components/UI/Model";
 import type { ITask } from "./Components/Interface";
 import { v4 as uuidv4 } from "uuid";
+import { addTaskValidation } from "./Validation";
+import ErrorMsg from "./Components/errorMsg";
 
 function App() {
+  const defaultNewTask = {
+    title: "",
+    id: "",
+    completed: false,
+  };
   //-------------------STATES------------------
   const [isOpened, setIsOpened] = useState(false);
   const [isEditOpened, setIsEditOpened] = useState(false);
   const [isRemoveOpened, setIsRemoveOpened] = useState(false);
   const [tasks, setTasks] = useState<ITask[]>(Tasks);
   const [taskToEditIdx, setTaskToEditIdx] = useState<number>(0);
-  const [taskToEdit, setTaskToEdit] = useState<ITask>({
-    title: "",
-    id: "",
-    completed: false,
-  });
+  const [taskToEdit, setTaskToEdit] = useState<ITask>(defaultNewTask);
   const [newTask, setNewTask] = useState<ITask>({
     title: "",
     id: "",
     completed: false,
   });
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
+  const [error, setError] = useState("");
 
   //-------------------HANDELERS------------------
   const openModel = () => setIsOpened(true);
@@ -45,9 +49,22 @@ function App() {
   };
   const onSubmitHandler = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    setTasks((prev) => [...prev, { ...newTask, id: uuidv4() }]);
     setNewTask({ title: "", id: "", completed: false });
+    const validation = addTaskValidation({ title: newTask.title });
+    if (validation) {
+      setError(validation.title);
+      return;
+    }
+
+    setTasks((prev) => [...prev, { ...newTask, id: uuidv4() }]);
     closeModel();
+  };
+  const onCancel = () => {
+    setNewTask(defaultNewTask);
+    closeModel();
+  };
+  const onCancelEditModel = () => {
+    closeEditModel();
   };
   const onSubmitEditHandler = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -70,6 +87,7 @@ function App() {
     setTasks(filterd);
     closeRemoveModel();
   };
+
   return (
     <>
       <div className="border-1 border-neutral-600 p-3 flex flex-col gap-3 items-center justify-center rounded-md">
@@ -89,11 +107,18 @@ function App() {
               value={newTask.title}
               onChange={onChangeHandler}
             />
+            {error && <ErrorMsg msg={error} />}
             <button
-              className="mt-3 inline-flex rounded-md bg-gray-700 px-3 py-1.5 text-md font-semibold text-white shadow-inner shadow-white/10 focus:not-data-focus:outline-none data-focus:outline data-focus:outline-white data-hover:bg-gray-600 data-open:bg-gray-700"
+              className="mt-3 mr-3 inline-flex rounded-md bg-gray-700 px-3 py-1.5 text-md font-semibold text-white shadow-inner shadow-white/10 focus:not-data-focus:outline-none data-focus:outline data-focus:outline-white data-hover:bg-gray-600 data-open:bg-gray-700"
               onClick={onSubmitHandler}
             >
               Sumbit
+            </button>
+            <button
+              className="mt-3 inline-flex rounded-md bg-gray-700 px-3 py-1.5 text-md font-semibold text-white shadow-inner shadow-white/10 focus:not-data-focus:outline-none data-focus:outline data-focus:outline-white data-hover:bg-gray-600 data-open:bg-gray-700"
+              onClick={onCancel}
+            >
+              Cancel
             </button>
           </Model>
           <Model
@@ -137,7 +162,7 @@ function App() {
               </button>
               <button
                 className=" w-full mt-3 inline-flex rounded-md bg-gray-700 px-3 py-1.5 text-md font-semibold text-white shadow-inner shadow-white/10 focus:not-data-focus:outline-none data-focus:outline focus:outline-white  hover:bg-zinc-600"
-                onSubmit={closeEditModel}
+                onSubmit={onCancelEditModel}
               >
                 Cancel
               </button>
