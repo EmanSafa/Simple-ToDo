@@ -27,7 +27,7 @@ function App() {
     completed: false,
   });
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
-  const [error, setError] = useState("");
+  const [error, setError] = useState({ title: "" });
 
   //-------------------HANDELERS------------------
   const openModel = () => setIsOpened(true);
@@ -42,6 +42,7 @@ function App() {
   const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setNewTask({ ...newTask, [name]: value });
+    setError({ ...error, [name]: "" });
   };
   const onChangeEditHandler = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -52,7 +53,7 @@ function App() {
     setNewTask({ title: "", id: "", completed: false });
     const validation = addTaskValidation({ title: newTask.title });
     if (validation) {
-      setError(validation.title);
+      setError(validation);
       return;
     }
 
@@ -107,7 +108,7 @@ function App() {
               value={newTask.title}
               onChange={onChangeHandler}
             />
-            {error && <ErrorMsg msg={error} />}
+            {error && <ErrorMsg msg={error.title} />}
             <button
               className="mt-3 mr-3 inline-flex rounded-md bg-gray-700 px-3 py-1.5 text-md font-semibold text-white shadow-inner shadow-white/10 focus:not-data-focus:outline-none data-focus:outline data-focus:outline-white data-hover:bg-gray-600 data-open:bg-gray-700"
               onClick={onSubmitHandler}
@@ -162,7 +163,7 @@ function App() {
               </button>
               <button
                 className=" w-full mt-3 inline-flex rounded-md bg-gray-700 px-3 py-1.5 text-md font-semibold text-white shadow-inner shadow-white/10 focus:not-data-focus:outline-none data-focus:outline focus:outline-white  hover:bg-zinc-600"
-                onSubmit={onCancelEditModel}
+                onClick={onCancelEditModel}
               >
                 Cancel
               </button>
