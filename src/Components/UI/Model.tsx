@@ -12,7 +12,7 @@ interface IProps {
   children: ReactNode;
   title: string;
 }
-const Model = ({ isOpen, isClosed, title, children }: IProps) => {
+const Modal = ({ isOpen, isClosed, title, children }: IProps) => {
   return (
     <>
       {isOpen && (
@@ -49,4 +49,4 @@ const Model = ({ isOpen, isClosed, title, children }: IProps) => {
     </>
   );
 };
-export default Model;
+export default Modal;

@@ -1,8 +1,13 @@
 import "./App.css";
 import Task from "./Components/Task";
 import { Tasks } from "./Components/Data/index";
-import { useState, type ChangeEvent, type MouseEvent } from "react";
-import Model from "./Components/UI/Model";
+import {
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type MouseEvent,
+} from "react";
+import Modal from "./Components/UI/Model";
 import type { ITask } from "./Components/Interface";
 import { v4 as uuidv4 } from "uuid";
 import { addTaskValidation } from "./Validation";
@@ -48,16 +53,19 @@ function App() {
     const { name, value } = e.target;
     setTaskToEdit({ ...taskToEdit, [name]: value });
   };
-  const onSubmitHandler = (e: MouseEvent<HTMLButtonElement>) => {
+  const onSubmitHandler = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setNewTask({ title: "", id: "", completed: false });
+
     const validation = addTaskValidation({ title: newTask.title });
-    if (validation) {
+
+    if (validation.title) {
       setError(validation);
       return;
     }
-
     setTasks((prev) => [...prev, { ...newTask, id: uuidv4() }]);
+    console.log(newTask);
+
+    setNewTask({ title: "", id: "", completed: false });
     closeModel();
   };
   const onCancel = () => {
@@ -100,29 +108,32 @@ function App() {
           >
             Add Task
           </button>
-          <Model isOpen={isOpened} isClosed={closeModel} title="ADD TASK">
-            <input
-              type="text"
-              className=" h-14  text-lg focus:border-1 focus:border-zinc-400 w-full mt-2 rounded-md shadow-2xl p-3"
-              name="title"
-              value={newTask.title}
-              onChange={onChangeHandler}
-            />
-            {error && <ErrorMsg msg={error.title} />}
-            <button
-              className="mt-3 mr-3 inline-flex rounded-md bg-gray-700 px-3 py-1.5 text-md font-semibold text-white shadow-inner shadow-white/10 focus:not-data-focus:outline-none data-focus:outline data-focus:outline-white data-hover:bg-gray-600 data-open:bg-gray-700"
-              onClick={onSubmitHandler}
-            >
-              Sumbit
-            </button>
-            <button
-              className="mt-3 inline-flex rounded-md bg-gray-700 px-3 py-1.5 text-md font-semibold text-white shadow-inner shadow-white/10 focus:not-data-focus:outline-none data-focus:outline data-focus:outline-white data-hover:bg-gray-600 data-open:bg-gray-700"
-              onClick={onCancel}
-            >
-              Cancel
-            </button>
-          </Model>
-          <Model
+          <Modal isOpen={isOpened} isClosed={closeModel} title="ADD TASK">
+            <form onSubmit={(e) => onSubmitHandler(e)}>
+              <input
+                autoFocus
+                type="text"
+                className="h-14 text-lg focus:border-1 focus:border-zinc-400 w-full mt-2 rounded-md shadow-2xl p-3"
+                name="title"
+                value={newTask.title}
+                onChange={onChangeHandler}
+              />
+              {error && <ErrorMsg msg={error.title} />}
+              <button
+                type="submit"
+                className="mt-3 mr-3 inline-flex rounded-md bg-gray-700 px-3 py-1.5 text-md font-semibold text-white shadow-inner shadow-white/10 focus:not-data-focus:outline-none data-focus:outline data-focus:outline-white data-hover:bg-gray-600 data-open:bg-gray-700"
+              >
+                Sumbit
+              </button>
+              <button
+                className="mt-3 inline-flex rounded-md bg-gray-700 px-3 py-1.5 text-md font-semibold text-white shadow-inner shadow-white/10 focus:not-data-focus:outline-none data-focus:outline data-focus:outline-white data-hover:bg-gray-600 data-open:bg-gray-700"
+                onClick={onCancel}
+              >
+                Cancel
+              </button>
+            </form>
+          </Modal>
+          <Modal
             isOpen={isRemoveOpened}
             isClosed={closeRemoveModel}
             title="Are You sure to Delete this task ?"
@@ -141,8 +152,8 @@ function App() {
                 Cancel
               </button>
             </div>
-          </Model>
-          <Model
+          </Modal>
+          <Modal
             isOpen={isEditOpened}
             isClosed={closeEditModel}
             title="Edit the Task"
@@ -169,7 +180,7 @@ function App() {
               </button>
             </div>
             <div />
-          </Model>
+          </Modal>
         </div>
         {tasks.map((task, idx) => (
           <Task
